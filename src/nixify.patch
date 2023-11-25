@@ -204,21 +204,21 @@ index 73d14c8c78..b180e63d48 100644
  
          @LIBEXECDIR@/snap-confine mr,
  
-@@ -573,7 +573,7 @@
+@@ -573,7 +573,8 @@
      # from the distribution package. This is also the location used when using
      # the core/base snap on all-snap systems. The variants here represent
      # various locations of libexecdir across distributions.
--    /usr/lib{,exec,64}/snapd/snap-update-ns r,
-+    {/usr/lib{,exec,64}/snapd,@LIBEXECDIR@}/snap-update-ns r,
+     /usr/lib{,exec,64}/snapd/snap-update-ns r,
++    @LIBEXECDIR@}snap-update-ns r,
  
      # ...snap-confine is not, conceptually, re-executing and uses
      # snap-update-ns from the distribution package but we are already inside
-@@ -602,7 +602,7 @@
+@@ -602,7 +602,8 @@
      # above but with the key difference that snap-discard-ns does not
      # have a dedicated profile so we need to inherit snap-confine's profile.
  
--    /usr/lib{,exec,64}/snapd/snap-discard-ns rix,
-+    {/usr/lib{,exec,64}/snapd,@LIBEXECDIR@}/snap-discard-ns rix,
+     /usr/lib{,exec,64}/snapd/snap-discard-ns rix,
++    @LIBEXECDIR@/snap-discard-ns rix,
      /var/lib/snapd/hostfs/usr/lib{,exec,64}/snapd/snap-discard-ns rix,
      /{,var/lib/snapd/}snap/{core,snapd}/*/usr/lib/snapd/snap-discard-ns rix,
      /var/lib/snapd/hostfs/{,var/lib/snapd/}snap/{core,snapd}/*/usr/lib/snapd/snap-discard-ns rix,
