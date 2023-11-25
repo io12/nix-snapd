@@ -209,7 +209,7 @@ index 73d14c8c78..b180e63d48 100644
      # the core/base snap on all-snap systems. The variants here represent
      # various locations of libexecdir across distributions.
      /usr/lib{,exec,64}/snapd/snap-update-ns r,
-+    @LIBEXECDIR@}snap-update-ns r,
++    @LIBEXECDIR@/snap-update-ns r,
  
      # ...snap-confine is not, conceptually, re-executing and uses
      # snap-update-ns from the distribution package but we are already inside
