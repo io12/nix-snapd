@@ -190,6 +190,7 @@ in stdenv.mkDerivation {
       --set PATH $out/bin:${
         lib.makeBinPath (with pkgs; [
           # Snapd calls
+          apparmor-parser
           util-linux.mount
           squashfsTools
           systemd
