@@ -172,23 +172,15 @@ index 24d82f04ca..eb7bbb6810 100644
  	CacheDir = filepath.Join(newrootdir, "/var/cache/apparmor")
  
  	SystemCacheDir = filepath.Join(ConfDir, "cache")
-@@ -466,15 +466,7 @@ func AppArmorParser() (cmd *exec.Cmd, internal bool, err error) {
- 		}
- 	}
+@@ -204,7 +204,7 @@ var (
+ 	// Since AppArmorParserMtime() will be called by generateKey() in
+ 	// system-key and that could be called by different users on the
+ 	// system, use a predictable search path for finding the parser.
+-	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
++	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:@apparmor_parser@/bin"
  
--	// now search for one in the configured parserSearchPath
--	for _, dir := range filepath.SplitList(parserSearchPath) {
--		path := filepath.Join(dir, "apparmor_parser")
--		if _, err := os.Stat(path); err == nil {
--			return exec.Command(path), false, nil
--		}
--	}
--
--	return nil, false, os.ErrNotExist
-+	return exec.Command("apparmor_parser"), false, nil
- }
- 
- // tryAppArmorParserFeature attempts to pre-process a bit of apparmor syntax with a given parser.
+ 	// Filesystem root defined locally to avoid dependency on the
+ 	// 'dirs' package
 diff --git a/snap/info.go b/snap/info.go
 index 020c4a9b3d..c8d32048b5 100644
 --- a/snap/info.go
