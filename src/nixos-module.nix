@@ -30,7 +30,10 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    security.apparmor.enable = true;
+    security.apparmor = {
+      enable = true;
+      packages = [ snap ];
+    };
 
     environment.systemPackages = [ snap ];
 
