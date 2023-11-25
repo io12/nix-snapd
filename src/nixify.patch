@@ -148,9 +148,9 @@ index 73d14c8c78..b180e63d48 100644
 -    /usr/lib/@{multiarch}/gconv/gconv-modules r,
 -    /usr/lib/@{multiarch}/gconv/gconv-modules.cache r,
 +    /{,usr/,@coreutils@/}bin/tr ixr,
-+    {/usr,@glibc@}/lib/locale/** r,
-+    {/usr,@glibc@}/lib/@{multiarch}/gconv/gconv-modules r,
-+    {/usr,@glibc@}/lib/@{multiarch}/gconv/gconv-modules.cache r,
++    /{usr,@glibc@}/lib/locale/** r,
++    /{usr,@glibc@}/lib/@{multiarch}/gconv/gconv-modules r,
++    /{usr,@glibc@}/lib/@{multiarch}/gconv/gconv-modules.cache r,
  
      # priv dropping
      capability setuid,
