@@ -33,6 +33,8 @@ in {
     security.apparmor = {
       enable = true;
       packages = [ snap ];
+      policies."libexec.snapd.snap-confine".profile =
+        "include ${snap}/etc/apparmor.d/usr.libexec.snapd.snap-confine";
     };
 
     environment.systemPackages = [ snap ];
