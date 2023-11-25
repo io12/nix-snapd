@@ -53,6 +53,15 @@ in {
       packages = [ snap ];
       sockets.snapd.wantedBy = [ "sockets.target" ];
       services.snapd.wantedBy = [ "multi-user.target" ];
+      services.nix-snapd-precreate = {
+        wantedBy = [ "apparmor.service" ];
+        before = [ "apparmor.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart =
+            "${pkgs.coreutils}/bin/mkdir -p /var/lib/snapd/apparmor/snap-confine";
+        };
+      };
     };
 
     security.wrappers.snap-confine-stage-1 = {
