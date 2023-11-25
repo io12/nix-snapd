@@ -68,13 +68,13 @@ in stdenv.mkDerivation {
 
   inherit (pkgs)
     glibc readline ncurses libselinux pcre libapparmor udev libseccomp libcap
-    apparmor_parser;
+    apparmor-parser;
   util-linux = pkgs.util-linux.lib;
   dbus = pkgs.dbus.lib;
 
   configurePhase = ''
     substituteInPlace $(grep -rl '@out@') --subst-var out
-    substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor_parser
+    substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor-parser
     substituteInPlace cmd/snap-confine/snap-confine.apparmor.in \
       --subst-var glibc \
       --subst-var readline \
