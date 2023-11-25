@@ -67,7 +67,8 @@ in stdenv.mkDerivation {
   patches = [ ./nixify.patch ];
 
   inherit (pkgs)
-    glibc readline ncurses libselinux pcre libapparmor udev libseccomp libcap;
+    coreutils glibc readline ncurses libselinux pcre libapparmor udev libseccomp
+    libcap;
   apparmor_parser = pkgs.apparmor-parser;
   util_linux = pkgs.util-linux.lib;
   dbus = pkgs.dbus.lib;
@@ -76,6 +77,7 @@ in stdenv.mkDerivation {
     substituteInPlace $(grep -rl '@out@') --subst-var out
     substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor_parser
     substituteInPlace cmd/snap-confine/snap-confine.apparmor.in \
+      --subst-var coreutils \
       --subst-var glibc \
       --subst-var readline \
       --subst-var ncurses \
