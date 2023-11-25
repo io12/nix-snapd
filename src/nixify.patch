@@ -76,6 +76,19 @@ index 7432d79cb1..ddff4d3132 100644
  }
  
  static void validate_bpfpath_is_safe(const char *path)
+diff --git a/cmd/snap-confine/snap-confine.apparmor.in b/cmd/snap-confine/snap-confine.apparmor.in
+index 73d14c8c78..b180e63d48 100644
+--- a/cmd/snap-confine/snap-confine.apparmor.in
++++ b/cmd/snap-confine/snap-confine.apparmor.in
+@@ -1,7 +1,7 @@
+ # Author: Jamie Strandboge <jamie@canonical.com>
+ #include <tunables/global>
+ 
+-@LIBEXECDIR@/snap-confine (attach_disconnected) {
++@LIBEXECDIR@/snap-confine-unwrapped (attach_disconnected) {
+     # Include any additional files that snapd chose to generate.
+     # - for $HOME on NFS
+     # - for $HOME on encrypted media
 diff --git a/cmd/snap-confine/snap-confine.c b/cmd/snap-confine/snap-confine.c
 index b735a100f7..78aac63e8a 100644
 --- a/cmd/snap-confine/snap-confine.c
