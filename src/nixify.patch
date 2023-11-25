@@ -159,6 +159,27 @@ index 008637492a..f4c3a42875 100644
  				logger.Noticef("running from non-installed location %s: ignoring system-key", exe)
  				return false, ErrSystemKeyVersion
  			}
+diff --git a/sandbox/apparmor/apparmor.go b/sandbox/apparmor/apparmor.go
+index 24d82f04ca..4a4b6d8553 100644
+--- a/sandbox/apparmor/apparmor.go
++++ b/sandbox/apparmor/apparmor.go
+@@ -466,15 +466,7 @@ func AppArmorParser() (cmd *exec.Cmd, internal bool, err error) {
+ 		}
+ 	}
+ 
+-	// now search for one in the configured parserSearchPath
+-	for _, dir := range filepath.SplitList(parserSearchPath) {
+-		path := filepath.Join(dir, "apparmor_parser")
+-		if _, err := os.Stat(path); err == nil {
+-			return exec.Command(path), false, nil
+-		}
+-	}
+-
+-	return nil, false, os.ErrNotExist
++	return exec.Command("apparmor_parser"), false, nil
+ }
+ 
+ // tryAppArmorParserFeature attempts to pre-process a bit of apparmor syntax with a given parser.
 diff --git a/snap/info.go b/snap/info.go
 index 020c4a9b3d..c8d32048b5 100644
 --- a/snap/info.go
