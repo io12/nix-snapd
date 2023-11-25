@@ -67,14 +67,14 @@ in stdenv.mkDerivation {
   patches = [ ./nixify.patch ];
 
   inherit (pkgs)
-    glibc readline ncurses libselinux pcre libapparmor udev libseccomp libcap
-    apparmor-parser;
-  util-linux = pkgs.util-linux.lib;
+    glibc readline ncurses libselinux pcre libapparmor udev libseccomp libcap;
+  apparmor_parser = pkgs.apparmor-parser;
+  util_linux = pkgs.util-linux.lib;
   dbus = pkgs.dbus.lib;
 
   configurePhase = ''
     substituteInPlace $(grep -rl '@out@') --subst-var out
-    substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor-parser
+    substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor_parser
     substituteInPlace cmd/snap-confine/snap-confine.apparmor.in \
       --subst-var glibc \
       --subst-var readline \
@@ -85,7 +85,7 @@ in stdenv.mkDerivation {
       --subst-var udev \
       --subst-var libseccomp \
       --subst-var libcap \
-      --subst-var util-linux \
+      --subst-var util_linux \
       --subst-var dbus
 
     export GOCACHE=$TMPDIR/go-cache

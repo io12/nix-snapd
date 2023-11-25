@@ -336,7 +336,7 @@ index 24d82f04ca..eb7bbb6810 100644
  	// system-key and that could be called by different users on the
  	// system, use a predictable search path for finding the parser.
 -	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-+	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:@apparmor-parser@/bin"
++	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:@apparmor_parser@/bin"
  
  	// Filesystem root defined locally to avoid dependency on the
  	// 'dirs' package
