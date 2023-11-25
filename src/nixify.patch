@@ -20,7 +20,7 @@ index e4c260bfd0..5dc547c422 100644
 -	install -d -m 755 $(DESTDIR)/etc/apparmor.d/
 -	install -m 644 snap-confine/snap-confine.apparmor $(DESTDIR)/etc/apparmor.d/$(patsubst .%,%,$(subst /,.,$(libexecdir))).snap-confine
 +	install -d -m 755 $(out)/etc/apparmor.d/
-+	install -m 644 snap-confine/snap-confine.apparmor $(out)/etc/apparmor.d/$(patsubst .%,%,$(subst /,.,$(libexecdir))).snap-confine
++	install -m 644 snap-confine/snap-confine.apparmor $(out)/etc/apparmor.d/usr.libexec.snapd.snap-confine
  endif
 -	install -d -m 755 $(DESTDIR)/var/lib/snapd/apparmor/snap-confine/
  
@@ -160,9 +160,18 @@ index 008637492a..f4c3a42875 100644
  				return false, ErrSystemKeyVersion
  			}
 diff --git a/sandbox/apparmor/apparmor.go b/sandbox/apparmor/apparmor.go
-index 24d82f04ca..4a4b6d8553 100644
+index 24d82f04ca..eb7bbb6810 100644
 --- a/sandbox/apparmor/apparmor.go
 +++ b/sandbox/apparmor/apparmor.go
+@@ -76,7 +76,7 @@ const (
+ )
+ 
+ func setupConfCacheDirs(newrootdir string) {
+-	ConfDir = filepath.Join(newrootdir, "/etc/apparmor.d")
++	ConfDir = filepath.Join(newrootdir, "@out@/etc/apparmor.d")
+ 	CacheDir = filepath.Join(newrootdir, "/var/cache/apparmor")
+ 
+ 	SystemCacheDir = filepath.Join(ConfDir, "cache")
 @@ -466,15 +466,7 @@ func AppArmorParser() (cmd *exec.Cmd, internal bool, err error) {
  		}
  	}
