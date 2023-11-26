@@ -20,7 +20,7 @@ index e4c260bfd0..5dc547c422 100644
 -	install -d -m 755 $(DESTDIR)/etc/apparmor.d/
 -	install -m 644 snap-confine/snap-confine.apparmor $(DESTDIR)/etc/apparmor.d/$(patsubst .%,%,$(subst /,.,$(libexecdir))).snap-confine
 +	install -d -m 755 $(out)/etc/apparmor.d/
-+	install -m 644 snap-confine/snap-confine.apparmor $(out)/etc/apparmor.d/$(patsubst .%,%,$(subst /,.,$(libexecdir))).snap-confine
++	install -m 644 snap-confine/snap-confine.apparmor $(out)/etc/apparmor.d/usr.libexec.snapd.snap-confine
  endif
 -	install -d -m 755 $(DESTDIR)/var/lib/snapd/apparmor/snap-confine/
  
@@ -76,21 +76,179 @@ index 7432d79cb1..ddff4d3132 100644
  }
  
  static void validate_bpfpath_is_safe(const char *path)
+diff --git a/cmd/snap-confine/snap-confine.apparmor.in b/cmd/snap-confine/snap-confine.apparmor.in
+index 73d14c8c78..b180e63d48 100644
+--- a/cmd/snap-confine/snap-confine.apparmor.in
++++ b/cmd/snap-confine/snap-confine.apparmor.in
+@@ -1,7 +1,7 @@
+ # Author: Jamie Strandboge <jamie@canonical.com>
+ #include <tunables/global>
+ 
+-@LIBEXECDIR@/snap-confine (attach_disconnected) {
++@LIBEXECDIR@/snap-confine-unwrapped (attach_disconnected) {
+     # Include any additional files that snapd chose to generate.
+     # - for $HOME on NFS
+     # - for $HOME on encrypted media
+@@ -18,30 +18,49 @@
+     # Do not assume that the interpreter is always named like
+     # ld-linux-x86_64.so, as on some architectures there can be a version after
+     # the .so suffix, eg. ld-linux-aarch64.so.1
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}ld{-*,64}.so* mrix,
++    @glibc@/lib/ld{-*,64}.so* mrix,
+     # libc, you are funny
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libc{,-[0-9]*}.so* mr,
++    @glibc@/lib/libc{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libpthread{,-[0-9]*}.so* mr,
++    @glibc@/lib/libpthread{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libreadline{,-[0-9]*}.so* mr,
++    @readline@/lib/libreadline{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}librt{,-[0-9]*}.so* mr,
++    @glibc@/lib/librt{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libgcc_s.so* mr,
++    @glibc@/lib/libgcc_s.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libncursesw{,-[0-9]*}.so* mr,
++    @ncurses@/lib/libncursesw{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libresolv{,-[0-9]*}.so* mr,
++    @glibc@/lib/libresolv{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libselinux.so* mr,
++    @libselinux@/lib/libselinux.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libpcre{,2}{,-[0-9]*}.so* mr,
++    @pcre@/lib/libpcre{,2}{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libmount.so* mr,
++    @util_linux@/lib/libmount.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libblkid.so* mr,
++    @util_linux@/lib/libblkid.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libuuid.so* mr,
++    @util_linux@/lib/libuuid.so* mr,
+     # normal libs in order
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libapparmor.so* mr,
++    @libapparmor@/lib/libapparmor.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libcgmanager.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libdl{,-[0-9]*}.so* mr,
++    @glibc@/lib/libdl{,-[0-9]*}.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnih.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnih-dbus.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libdbus-1.so* mr,
++    @dbus@/lib/libdbus-1.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libudev.so* mr,
++    @udev@/lib/libudev.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libseccomp.so* mr,
++    @libseccomp@/lib/libseccomp.so* mr,
+     /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libcap.so* mr,
++    @libcap@/lib/libcap.so* mr,
+ 
+     @LIBEXECDIR@/snap-confine mr,
+ 
+@@ -99,10 +99,13 @@
+     /etc/udev/udev.conf r,
+     /sys/**/uevent r,
+     /run/udev/** rw,
+     /{,usr/}bin/tr ixr,
++    @coreutils@/bin/tr ixr,
+     /usr/lib/locale/** r,
++    @glibc@/lib/locale/** r,
+     /usr/lib/@{multiarch}/gconv/gconv-modules r,
++    @glibc@/lib/gconv/gconv-modules r,
+     /usr/lib/@{multiarch}/gconv/gconv-modules.cache r,
+ 
+     # priv dropping
+     capability setuid,
+@@ -498,30 +498,49 @@
+         # We run privileged, so be fanatical about what we include and don't use
+         # any abstractions
+         /etc/ld.so.cache r,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}ld{-*,64}.so* mrix,
++        @glibc@/lib/ld{-*,64}.so* mrix,
+         # libc, you are funny
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libc{,-[0-9]*}.so* mr,
++        @glibc@/lib/libc{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libpthread{,-[0-9]*}.so* mr,
++        @glibc@/lib/libpthread{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libreadline{,-[0-9]*}.so* mr,
++        @readline@/lib/libreadline{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}librt{,-[0-9]*}.so* mr,
++        @glibc@/lib/librt{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libgcc_s.so* mr,
++        @glibc@/lib/libgcc_s.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libncursesw{,-[0-9]*}.so* mr,
++        @ncurses@/lib/libncursesw{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libresolv{,-[0-9]*}.so* mr,
++        @glibc@/lib/libresolv{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libselinux.so* mr,
++        @libselinux@/lib/libselinux.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libpcre.so* mr,
++        @pcre@/lib/libpcre.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libmount.so* mr,
++        @util_linux@/lib/libmount.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libblkid.so* mr,
++        @util_linux@/lib/libblkid.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libuuid.so* mr,
++        @util_linux@/lib/libuuid.so* mr,
+         # normal libs in order
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libapparmor.so* mr,
++        @libapparmor@/lib/libapparmor.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libcgmanager.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/{,atomics/}}libdl{,-[0-9]*}.so* mr,
++        @glibc@/lib/libdl{,-[0-9]*}.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnih.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnih-dbus.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libdbus-1.so* mr,
++        @dbus@/lib/libdbus-1.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libudev.so* mr,
++        @udev@/lib/libudev.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libseccomp.so* mr,
++        @libseccomp@/lib/libseccomp.so* mr,
+         /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libcap.so* mr,
++        @libcap@/lib/libcap.so* mr,
+ 
+         @LIBEXECDIR@/snap-confine mr,
+ 
+@@ -573,7 +573,8 @@
+     # from the distribution package. This is also the location used when using
+     # the core/base snap on all-snap systems. The variants here represent
+     # various locations of libexecdir across distributions.
+     /usr/lib{,exec,64}/snapd/snap-update-ns r,
++    @LIBEXECDIR@/snap-update-ns r,
+ 
+     # ...snap-confine is not, conceptually, re-executing and uses
+     # snap-update-ns from the distribution package but we are already inside
+@@ -602,7 +602,8 @@
+     # above but with the key difference that snap-discard-ns does not
+     # have a dedicated profile so we need to inherit snap-confine's profile.
+ 
+     /usr/lib{,exec,64}/snapd/snap-discard-ns rix,
++    @LIBEXECDIR@/snap-discard-ns rix,
+     /var/lib/snapd/hostfs/usr/lib{,exec,64}/snapd/snap-discard-ns rix,
+     /{,var/lib/snapd/}snap/{core,snapd}/*/usr/lib/snapd/snap-discard-ns rix,
+     /var/lib/snapd/hostfs/{,var/lib/snapd/}snap/{core,snapd}/*/usr/lib/snapd/snap-discard-ns rix,
+@@ -623,9 +623,12 @@
+ 
+     # Explicitly deny these accesses which show up on Arch to silence the
+     # denials for this unneeded access.
+     deny /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnss_files-[0-9]*.so* mr,
++    deny @glibc@/lib/libnss_files-[0-9]*.so* mr,
+     deny /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnss_mymachines.[0-9]*.so* mr,
++    deny @glibc@/lib/libnss_mymachines.[0-9]*.so* mr,
+     deny /{,usr/}lib{,32,64,x32}/{,@{multiarch}/}libnss_systemd.[0-9]*.so* mr,
++    deny @glibc@/lib/libnss_systemd.[0-9]*.so* mr,
+     deny /etc/nsswitch.conf r,
+     deny /etc/passwd r,
+ }
 diff --git a/cmd/snap-confine/snap-confine.c b/cmd/snap-confine/snap-confine.c
-index b735a100f7..78aac63e8a 100644
+index b735a100f7..ecd1615237 100644
 --- a/cmd/snap-confine/snap-confine.c
 +++ b/cmd/snap-confine/snap-confine.c
 @@ -421,7 +421,7 @@ int main(int argc, char **argv)
  		 * one, which definitely doesn't run in a snap-specific namespace, has a
  		 * predictable PID and is long lived.
  		 */
-+		// NIX PATCH: Don't try to escape the FHS environment
 -		sc_reassociate_with_pid1_mount_ns();
++		// NIX PATCH: Don't try to escape the FHS environment
  		// Do global initialization:
  		int global_lock_fd = sc_lock_global();
  		// Ensure that "/" or "/snap" is mounted with the
 diff --git a/dirs/dirs.go b/dirs/dirs.go
-index d662937840..da810ec65d 100644
+index d662937840..f01aebf854 100644
 --- a/dirs/dirs.go
 +++ b/dirs/dirs.go
 @@ -296,7 +296,7 @@ func SnapSystemdConfDirUnder(rootdir string) string {
@@ -159,6 +317,28 @@ index 008637492a..f4c3a42875 100644
  				logger.Noticef("running from non-installed location %s: ignoring system-key", exe)
  				return false, ErrSystemKeyVersion
  			}
+diff --git a/sandbox/apparmor/apparmor.go b/sandbox/apparmor/apparmor.go
+index 24d82f04ca..eb7bbb6810 100644
+--- a/sandbox/apparmor/apparmor.go
++++ b/sandbox/apparmor/apparmor.go
+@@ -76,7 +76,7 @@ const (
+ )
+ 
+ func setupConfCacheDirs(newrootdir string) {
+-	ConfDir = filepath.Join(newrootdir, "/etc/apparmor.d")
++	ConfDir = filepath.Join(newrootdir, "@out@/etc/apparmor.d")
+ 	CacheDir = filepath.Join(newrootdir, "/var/cache/apparmor")
+ 
+ 	SystemCacheDir = filepath.Join(ConfDir, "cache")
+@@ -204,7 +204,7 @@ var (
+ 	// Since AppArmorParserMtime() will be called by generateKey() in
+ 	// system-key and that could be called by different users on the
+ 	// system, use a predictable search path for finding the parser.
+-	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
++	parserSearchPath = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:@apparmor_parser@/bin"
+ 
+ 	// Filesystem root defined locally to avoid dependency on the
+ 	// 'dirs' package
 diff --git a/snap/info.go b/snap/info.go
 index 020c4a9b3d..c8d32048b5 100644
 --- a/snap/info.go

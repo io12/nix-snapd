@@ -66,8 +66,30 @@ in stdenv.mkDerivation {
 
   patches = [ ./nixify.patch ];
 
+  inherit (pkgs)
+    coreutils glibc readline ncurses libselinux pcre libapparmor udev
+    libseccomp;
+  apparmor_parser = pkgs.apparmor-parser;
+  util_linux = pkgs.util-linux.lib;
+  dbus = pkgs.dbus.lib;
+  libcap = pkgs.libcap.lib;
+
   configurePhase = ''
-    substituteInPlace $(grep -rl '@out@') --subst-var 'out'
+    substituteInPlace $(grep -rl '@out@') --subst-var out
+    substituteInPlace sandbox/apparmor/apparmor.go --subst-var apparmor_parser
+    substituteInPlace cmd/snap-confine/snap-confine.apparmor.in \
+      --subst-var coreutils \
+      --subst-var glibc \
+      --subst-var readline \
+      --subst-var ncurses \
+      --subst-var libselinux \
+      --subst-var pcre \
+      --subst-var libapparmor \
+      --subst-var udev \
+      --subst-var libseccomp \
+      --subst-var libcap \
+      --subst-var util_linux \
+      --subst-var dbus
 
     export GOCACHE=$TMPDIR/go-cache
 
@@ -215,6 +237,7 @@ in stdenv.mkDerivation {
           # Pre-create directories
           install -dm755 /var/lib/snapd/snaps
           install -dm111 /var/lib/snapd/void
+          mkdir -p /var/lib/snapd/apparmor/snap-confine
 
           # Upstream snapd writes unit files to /etc/systemd/system, which is
           # immutable on NixOS. This package works around that by patching snapd
